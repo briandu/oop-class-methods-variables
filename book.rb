@@ -1,26 +1,30 @@
+# Remember to run "source("book.rb")" in irb
+
 class Book
 
   @@on_shelf = []
   @@on_loan = []
 
-  attr_accessor :due_date
-  attr_reader :title, :author, :isbn, :on_shelf
+  attr_accessor :due_date, :date_borrowed
+  attr_reader :title, :author, :isbn
 
 
 # INSTANCE METHODS
 
-  def initialize(title, author, isbn)
+  def initialize(title, author, isbn, date_borrowed = nil)
     @title = title
     @author = author
     @isbn = isbn
+    @date_borrowed = date_borrowed
   end
 
   def borrow # complete
-    check = self.lent_out?
-      if check == false
-        @@on_loan.push(@@on_shelf.delete(self))
-      else
+      if self.lent_out?
         "This book is currently lent out."
+      else
+        @@on_loan.push(@@on_shelf.delete(self))
+        @@on_loan.map{|x| x.title == self.title ? x.date_borrowed = Time.now : x}
+        puts @@on_loan
       end
   end
 
@@ -55,11 +59,20 @@ class Book
     end
   end
 
-  def self.current_due_date
-
+  def current_due_date # complete
+    self.date_borrowed + (60*60*24*14)
   end
 
   def self.overdue_books
+    #.each for book on loan
+    # check if date_borrowed > Time.now
+    # if True then overdue
+    @@on_loan.each do |book|
+      if book.current_due_date >= Time.now
+      else
+        puts "- #{book.title} + #{book.author} is overdue"
+      end
+    end
   end
 
   def self.browse
@@ -76,7 +89,7 @@ end
 
 # BOOKS
 
-harry_potter = Book.create("Harry Potter and the Philosopher Stone", "J.K.Rowling", "123949501")
-seven_habits = Book.create("7 Habits of Highly Effective People", "Steph R. Covey", "204951840")
+harry_potter = Book.create("Harry Potter and the Philosopher Stone", "J.K.Rowling", "123949501",)
+seven_habits = Book.create("7 Habits of Highly Effective People", "Steph R. Covey", "204951840",)
 lotr = Book.create("Lord of the Rings", "J.R.R Tolkien", "209584729")
 got = Book.create("Game of Thrones", "George R. R. Martin", "129475691284")
